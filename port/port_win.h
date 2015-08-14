@@ -31,7 +31,6 @@
 #ifndef STORAGE_LEVELDB_PORT_PORT_WIN_H_
 #define STORAGE_LEVELDB_PORT_PORT_WIN_H_
 
-#define _WIN32_WINNT 0x0600 /* Windows Vista Min Required */
 #include <windows.h>
 
 #include <string>

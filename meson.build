@@ -30,7 +30,7 @@ if meson.is_cross_build()
     cpp_args = [ '-DOS_ANDROID' , '-DLEVELDB_PLATFORM_POSIX', '-D_REENTRANT', '-fno-builtin-memcmp' ]
   elif host.name() == 'mingw'
     port_src = [ 'port/port_win.cc' ]
-    cpp_args = [ '-DLEVELDB_PLATFORM_WINDOWS' ]
+    cpp_args = [ '-D_WIN32_WINNT=0x0600', '-DLEVELDB_PLATFORM_WINDOWS' ]
   endif
 else
   if host.name() == 'linux'
