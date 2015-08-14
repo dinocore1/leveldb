@@ -13,7 +13,7 @@ db_src = [ 'db/builder.cc', 'db/c.cc', 'db/db_impl.cc', 'db/db_iter.cc', 'db/dbf
 ]
 
 util_src = [ 'util/arena.cc', 'util/bloom.cc', 'util/cache.cc', 'util/coding.cc',
-'util/comparator.cc', 'util/crc32c.cc', 'util/env.cc', 'util/env_posix.cc',
+'util/comparator.cc', 'util/crc32c.cc', 'util/env.cc',
 'util/filter_policy.cc', 'util/hash.cc', 'util/histogram.cc', 'util/logging.cc',
 'util/options.cc', 'util/status.cc' ]
 
@@ -26,22 +26,22 @@ port_src = []
 
 if meson.is_cross_build()
   if host.name() == 'android'
-    port_src = [ 'port/port_posix.cc' ]
+    port_src = [ 'port/port_posix.cc', 'util/env_posix.cc' ]
     cpp_args = [ '-DOS_ANDROID' , '-DLEVELDB_PLATFORM_POSIX', '-D_REENTRANT', '-fno-builtin-memcmp' ]
   elif host.name() == 'mingw'
     port_src = [ 'port/port_win.cc' ]
-    cpp_args = [ '-DLEVELDB_EXPORTS', '-DLEVELDB_PLATFORM_WINDOWS' ]
+    cpp_args = [ '-DLEVELDB_PLATFORM_WINDOWS' ]
   endif
 else
   if host.name() == 'linux'
-    port_src = [ 'port/port_posix.cc' ]
+    port_src = [ 'port/port_posix.cc', 'util/env_posix.cc' ]
     cpp_args = [ '-DOS_LINUX', '-DLEVELDB_PLATFORM_POSIX' ]
   elif host.name() == 'darwin'
-    port_src = [ 'port/port_posix.cc' ]
+    port_src = [ 'port/port_posix.cc', 'util/env_posix.cc' ]
     cpp_args = [ '-DOS_MACOSX', '-DLEVELDB_PLATFORM_POSIX' ]
   elif host.name() == 'windows'
     port_src = [ 'port/port_win.cc' ]
-    cpp_args = [ '-DLEVELDB_EXPORTS', '-DLEVELDB_PLATFORM_WINDOWS' ]
+    cpp_args = [ '-DLEVELDB_PLATFORM_WINDOWS' ]
   endif
 endif
 

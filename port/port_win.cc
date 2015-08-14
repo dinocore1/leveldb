@@ -30,9 +30,6 @@
 
 #include "port/port_win.h"
 
-#define NOMINMAX
-#include <windows.h>
-#undef DeleteFile
 #include <cassert>
 
 namespace leveldb {
@@ -121,13 +118,25 @@ void CondVar::SignalAll() {
   wait_mtx_.Unlock();
 }
 
-BOOL CALLBACK InitHandleFunction (PINIT_ONCE InitOnce, PVOID func, PVOID *lpContext) {
-  ((void (*)())func)();
-  return true;
+typedef void (*initFun)();
+
+BOOL CALLBACK InitHandleFunction (
+  PINIT_ONCE InitOnce,
+  PVOID Parameter,
+  PVOID *lpContext) {
+    
+    initFun fun = (initFun)Parameter;
+    fun();
+    return true;
 }
 
 void InitOnce(OnceType* once, void (*initializer)()) {
-  InitOnceExecuteOnce((PINIT_ONCE)once, InitHandleFunction, initializer, NULL);
+  PVOID lpContext;
+  
+  ::InitOnceExecuteOnce((INIT_ONCE*)once, 
+    InitHandleFunction,
+    (PVOID)initializer,
+    &lpContext);
 }
 
 }

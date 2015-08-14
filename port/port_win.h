@@ -31,9 +31,8 @@
 #ifndef STORAGE_LEVELDB_PORT_PORT_WIN_H_
 #define STORAGE_LEVELDB_PORT_PORT_WIN_H_
 
-#define snprintf _snprintf
-#define close _close
-#define fread_unlocked _fread_nolock
+#define _WIN32_WINNT 0x0600 /* Windows Vista Min Required */
+#include <windows.h>
 
 #include <string>
 #include <stdint.h>
@@ -96,8 +95,15 @@ class CondVar {
   
 };
 
-typedef void* OnceType;
-#define LEVELDB_ONCE_INIT 0
+// Thread-safe initialization.
+// Used as follows:
+//      static port::OnceType init_control = LEVELDB_ONCE_INIT;
+//      static void Initializer() { ... do something ...; }
+//      ...
+//      port::InitOnce(&init_control, &Initializer);
+
+typedef INIT_ONCE OnceType;
+#define LEVELDB_ONCE_INIT INIT_ONCE_STATIC_INIT
 extern void InitOnce(port::OnceType*, void (*initializer)());
 
 // Storage for a lock-free pointer
