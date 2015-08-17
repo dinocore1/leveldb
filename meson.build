@@ -29,7 +29,7 @@ if meson.is_cross_build()
     port_src = [ 'port/port_posix.cc', 'util/env_posix.cc' ]
     cpp_args = [ '-DOS_ANDROID' , '-DLEVELDB_PLATFORM_POSIX', '-D_REENTRANT', '-fno-builtin-memcmp' ]
   elif host.name() == 'mingw'
-    port_src = [ 'port/port_win.cc' ]
+    port_src = [ 'port/port_win.cc', 'util/env_windows.cc' ]
     cpp_args = [ '-D_WIN32_WINNT=0x0600', '-DLEVELDB_PLATFORM_WINDOWS' ]
   endif
 else
@@ -40,7 +40,7 @@ else
     port_src = [ 'port/port_posix.cc', 'util/env_posix.cc' ]
     cpp_args = [ '-DOS_MACOSX', '-DLEVELDB_PLATFORM_POSIX' ]
   elif host.name() == 'windows'
-    port_src = [ 'port/port_win.cc' ]
+    port_src = [ 'port/port_win.cc', 'util/env_windows.cc' ]
     cpp_args = [ '-DLEVELDB_PLATFORM_WINDOWS' ]
   endif
 endif
