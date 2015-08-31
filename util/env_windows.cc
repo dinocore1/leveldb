@@ -4,55 +4,82 @@
 
 #include "leveldb/env.h"
 
+#include "windows.h"
 
 namespace leveldb {
+  
+class WindowsSequentialFile : public SequentialFile {
+  private:
+  HANDLE hFile;
+  
+  public:
+  
+  WindowsSequentialFile(const HANDLE file)
+  : hFile(file) { }
+  
+  virtual Status Read(size_t n, Slice* result, char* scratch) {
+    
+  }  
+};
 
 class WindowsEnv : public Env {
 	public:
-	WindowsEnv() {}
-	virtual ~WindowsEnv() {}
+  WindowsEnv() {}
+  virtual ~WindowsEnv() {}
 	
-	virtual Status NewSequentialFile(const std::string& fname,
-                                   SequentialFile** result) {}
+  virtual Status NewSequentialFile(const std::string& fname,
+                                   SequentialFile** result) {
+    HANDLE hFile = CreateFile(fname.c_str(), 
+       GENERIC_READ,
+       FILE_SHARE_READ, 
+       NULL, 
+       OPEN_EXISTING, 
+       FILE_ATTRIBUTE_NORMAL, 
+       NULL);
+    
+    
+                                     
+  }
 
-virtual Status NewRandomAccessFile(const std::string& fname,
+  virtual Status NewRandomAccessFile(const std::string& fname,
                                      RandomAccessFile** result) {}
 									 
-virtual Status NewWritableFile(const std::string& fname,
+  virtual Status NewWritableFile(const std::string& fname,
                                  WritableFile** result) {}
 								 
-virtual bool FileExists(const std::string& fname){}
+  virtual bool FileExists(const std::string& fname){}
 
-virtual Status GetChildren(const std::string& dir,
+  virtual Status GetChildren(const std::string& dir,
                              std::vector<std::string>* result){}
 							 
-virtual Status DeleteFile(const std::string& fname) {}
+  virtual Status DeleteFile(const std::string& fname) {}
 
-virtual Status CreateDir(const std::string& dirname) {}
+  virtual Status CreateDir(const std::string& dirname) {}
 
-virtual Status DeleteDir(const std::string& dirname){}
+  virtual Status DeleteDir(const std::string& dirname){}
 
-virtual Status GetFileSize(const std::string& fname, uint64_t* file_size){}
+  virtual Status GetFileSize(const std::string& fname, uint64_t* file_size){}
 
-virtual Status RenameFile(const std::string& src,
+  virtual Status RenameFile(const std::string& src,
                             const std::string& target){}
 							
-virtual Status LockFile(const std::string& fname, FileLock** lock){}
+  virtual Status LockFile(const std::string& fname, FileLock** lock){}
 
-virtual Status UnlockFile(FileLock* lock){}
-virtual void Schedule(
+  virtual Status UnlockFile(FileLock* lock){}
+  
+  virtual void Schedule(
       void (*function)(void* arg),
       void* arg){}
 	  
-virtual void StartThread(void (*function)(void* arg), void* arg){}
+  virtual void StartThread(void (*function)(void* arg), void* arg){}
 
-virtual Status GetTestDirectory(std::string* path){}
+  virtual Status GetTestDirectory(std::string* path){}
 
-virtual Status NewLogger(const std::string& fname, Logger** result){}
+  virtual Status NewLogger(const std::string& fname, Logger** result){}
 
-virtual uint64_t NowMicros(){}
+  virtual uint64_t NowMicros(){}
 
-virtual void SleepForMicroseconds(int micros){}
+  virtual void SleepForMicroseconds(int micros){}
 
 };
 
