@@ -1,10 +1,6 @@
-// Copyright (c) 2011 The LevelDB Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file. See the AUTHORS file for names of contributors.
+#include "windows.h"
 
 #include "leveldb/env.h"
-
-#include "windows.h"
 
 namespace leveldb {
   
@@ -32,7 +28,7 @@ static Status IOError(const std::string& context, DWORD errorCode) {
   
 class WindowsSequentialFile : public SequentialFile {
   private:
-  std::string& mFilename;
+  const std::string& mFilename;
   HANDLE hFile;
   
   public:
@@ -46,12 +42,52 @@ class WindowsSequentialFile : public SequentialFile {
   virtual Status Read(size_t n, Slice* result, char* scratch) {
     DWORD r;
     if(ReadFile(hFile, scratch, n, &r, NULL)){
-      result = Slice(scratch, r);
+      *result = Slice(scratch, r);
       return Status::OK();
     } else {
       return IOError(mFilename, GetLastError());
     }
-  }  
+  }
+  
+  virtual Status Skip(uint64_t n) {
+    LARGE_INTEGER li;
+    li.QuadPart = n;
+    
+    li.LowPart = SetFilePointer(hFile, li.LowPart, &li.HighPart, FILE_CURRENT);
+    if(li.LowPart == INVALID_SET_FILE_POINTER) {
+      return IOError(mFilename, GetLastError());
+    } else {
+      return Status::OK();
+    }
+  }
+};
+
+class WindowsWriteableFile : public WritableFile {
+  private:
+  const std::string& mFilename;
+  HANDLE hFile;
+  
+  
+  public:
+  WindowsWriteableFile(const std::string& filename, const HANDLE file)
+  : mFilename(filename), hFile(file) { }
+  
+  ~WindowsWriteableFile() {
+    CloseHandle(hFile);
+  }
+  
+  virtual Status Append(const Slice& data) {
+    
+  }
+  virtual Status Close() {
+    
+  }
+  virtual Status Flush() {
+    
+  }
+  virtual Status Sync() {
+    
+  }
 };
 
 class WindowsEnv : public Env {
@@ -85,11 +121,29 @@ class WindowsEnv : public Env {
 									 
   virtual Status NewWritableFile(const std::string& fname,
                                  WritableFile** result) {
-    return Status::NotSupported("not implemented");
+    
+    
+    HANDLE hFile = CreateFile(fname.c_str(),
+      GENERIC_WRITE,
+      FILE_SHARE_WRITE,
+      NULL,
+      OPEN_EXISTING,
+      FILE_ATTRIBUTE_NORMAL,
+      NULL);
+      
+      if(hFile == INVALID_HANDLE_VALUE) {
+        *result = NULL;
+        return IOError(fname, GetLastError());
+      } else {
+        *result = new WindowsWriteableFile(fname, hFile);
+        return Status::OK();
+      }
+    
   }
 								 
   virtual bool FileExists(const std::string& fname){
-    return Status::NotSupported("not implemented");
+    //TODO implement
+    return false;
   }
 
   virtual Status GetChildren(const std::string& dir,
@@ -97,7 +151,7 @@ class WindowsEnv : public Env {
     return Status::NotSupported("not implemented");
   
   }
-							 
+  
   virtual Status DeleteFile(const std::string& fname) {
     return Status::NotSupported("not implemented");
   }
@@ -130,11 +184,12 @@ class WindowsEnv : public Env {
   virtual void Schedule(
       void (*function)(void* arg),
       void* arg){
-    return Status::NotSupported("not implemented");
+    
+    //TODO implement
   }
 	  
   virtual void StartThread(void (*function)(void* arg), void* arg){
-    return Status::NotSupported("not implemented");
+    //TODO implement
   }
 
   virtual Status GetTestDirectory(std::string* path){
@@ -146,11 +201,11 @@ class WindowsEnv : public Env {
   }
 
   virtual uint64_t NowMicros(){
-    return Status::NotSupported("not implemented");
+    //TODO implement
+    return 0;
   }
 
   virtual void SleepForMicroseconds(int micros){
-    return Status::NotSupported("not implemented");
   }
 
 };
