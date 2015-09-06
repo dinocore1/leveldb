@@ -73,18 +73,36 @@ class WindowsWriteableFile : public WritableFile {
   : mFilename(filename), hFile(file) { }
   
   ~WindowsWriteableFile() {
-    CloseHandle(hFile);
+    Close();
   }
   
   virtual Status Append(const Slice& data) {
-    
+    DWORD numBytesWritten;
+    if(WriteFile(hFile, data.data(), data.size(), &numBytesWritten, NULL)){
+      return Status::OK();
+    } else {
+      return IOError(mFilename, GetLastError());
+    }
   }
+  
   virtual Status Close() {
-    
+    if(hFile != INVALID_HANDLE_VALUE) {
+      CloseHandle(hFile);
+      hFile = INVALID_HANDLE_VALUE;
+      return Status::OK();
+    } else {
+      return IOError(mFilename, GetLastError());
+    }
   }
+  
   virtual Status Flush() {
-    
+    if(FlushFileBuffers(hFile)) {
+      return Status::OK();
+    } else {
+      return IOError(mFilename, GetLastError());
+    }
   }
+  
   virtual Status Sync() {
     
   }
