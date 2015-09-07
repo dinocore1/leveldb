@@ -140,7 +140,6 @@ class WindowsEnv : public Env {
   virtual Status NewWritableFile(const std::string& fname,
                                  WritableFile** result) {
     
-    
     HANDLE hFile = CreateFile(fname.c_str(),
       GENERIC_WRITE,
       FILE_SHARE_WRITE,
@@ -160,8 +159,13 @@ class WindowsEnv : public Env {
   }
 								 
   virtual bool FileExists(const std::string& fname){
-    //TODO implement
-    return false;
+    WIN32_FIND_DATA FindFileData;
+    HANDLE handle = FindFirstFile(fname.c_str(), &FindFileData);
+    int found = handle != INVALID_HANDLE_VALUE;
+    if(found) {
+      FindClose(handle);
+    }
+    return found;
   }
 
   virtual Status GetChildren(const std::string& dir,
