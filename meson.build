@@ -25,21 +25,21 @@ cpp_args = []
 port_src = []
 
 if meson.is_cross_build()
-  if host.name() == 'android'
+  if host_machine.system() == 'android'
     port_src = [ 'port/port_posix.cc', 'util/env_posix.cc' ]
     cpp_args = [ '-DOS_ANDROID' , '-DLEVELDB_PLATFORM_POSIX', '-D_REENTRANT', '-fno-builtin-memcmp' ]
-  elif host.name() == 'mingw'
+  elif host_machine.system() == 'mingw'
     port_src = [ 'port/port_win.cc', 'util/env_windows.cc' ]
     cpp_args = [ '-D_WIN32_WINNT=0x0600', '-DLEVELDB_PLATFORM_WINDOWS' ]
   endif
 else
-  if host.name() == 'linux'
+  if host_machine.system() == 'linux'
     port_src = [ 'port/port_posix.cc', 'util/env_posix.cc' ]
     cpp_args = [ '-DOS_LINUX', '-DLEVELDB_PLATFORM_POSIX' ]
-  elif host.name() == 'darwin'
+  elif host_machine.system() == 'darwin'
     port_src = [ 'port/port_posix.cc', 'util/env_posix.cc' ]
     cpp_args = [ '-DOS_MACOSX', '-DLEVELDB_PLATFORM_POSIX' ]
-  elif host.name() == 'windows'
+  elif host_machine.system() == 'windows'
     port_src = [ 'port/port_win.cc', 'util/env_windows.cc' ]
     cpp_args = [ '-DLEVELDB_PLATFORM_WINDOWS' ]
   endif
