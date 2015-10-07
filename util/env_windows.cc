@@ -104,7 +104,7 @@ class WindowsWriteableFile : public WritableFile {
   }
   
   virtual Status Sync() {
-    
+    return Flush();
   }
 };
 
@@ -187,7 +187,25 @@ class WindowsEnv : public Env {
   }
 
   virtual Status GetFileSize(const std::string& fname, uint64_t* file_size){
-    return Status::NotSupported("not implemented");
+    
+    HANDLE hFile = CreateFile(fname.c_str(), 
+       FILE_READ_ATTRIBUTES,
+       FILE_SHARE_READ, 
+       NULL, 
+       OPEN_EXISTING, 
+       FILE_ATTRIBUTE_NORMAL, 
+       NULL);
+       
+   if(hFile == INVALID_HANDLE_VALUE) {
+     return IOError(fname, GetLastError());
+   } else {
+     LARGE_INTEGER size;
+     BOOL success = GetFileSizeEx(hFile, &size);
+     *file_size = size.QuadPart;
+     Status retval = success ? Status::OK() : IOError(fname, GetLastError());
+     CloseHandle(hFile);
+     return retval;
+   }
   }
 
   virtual Status RenameFile(const std::string& src,
